@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Button, InputLabel } from '@material-ui/core';
-let CBOR = require('cbor-sync');
+import cbor from 'cbor';
+// import * as wasm from '@emurgo/cardano-serialization-lib-browser';
+// let CBOR = require('cbor-sync');
 
 const ConnectNamiWallet = () => {
 
@@ -20,7 +22,25 @@ const ConnectNamiWallet = () => {
             setNetworkId(cardano.getNetworkId())
             setWalletAddress(await cardano.getUsedAddresses());
             setWalletUnUsedAddress(await cardano.getUnusedAddresses());
-            setWalletBalance(await cardano.getBalance());
+
+            // Get the Ada Balance & Other Asset Balances
+            let balEncoded = await cardano.getBalance();
+            let balArray = cbor.decode(await cardano.getBalance());
+            console.log("balArray -- ", balArray);
+            setWalletBalance(balArray[0]);
+
+console.log("Keys - ", balArray[1]);
+
+
+            // cardano.getBalance().then(res => {
+            //     const balance = wasm.Value.from_bytes(Buffer.from(res, 'hex'));
+            //     const lovelaces = balance.coin().to_str();
+             
+            //     console.log(lovelaces);
+            //  });
+
+// console.log("getCollateral -- ", await cardano.getCollateral());
+
           }
        }
        setWalletState();
@@ -47,7 +67,7 @@ const ConnectNamiWallet = () => {
           <InputLabel>Network: {networkId === "1" ? "Mainnet" : "Testnet"}</InputLabel>
           <InputLabel>Wallet: {walletAddress}</InputLabel>
           <InputLabel>Wallet (UnUsed): {walletUnUsedAddress}</InputLabel>
-          <InputLabel>Balance: {CBOR.decode(walletBalance, 'hex')} ({walletBalance})</InputLabel>
+          <InputLabel>Balance: {walletBalance}</InputLabel>
         </>);
         
       }
